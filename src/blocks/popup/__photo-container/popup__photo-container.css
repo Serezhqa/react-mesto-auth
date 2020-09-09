@@ -1,0 +1,8 @@
+.popup__photo-container {
+  margin: auto;
+  position: relative;
+}
+
+.popup__photo-container:hover {
+  cursor: default;
+}

@@ -1,0 +1,17 @@
+.elements__heading {
+  color: #000;
+  font-family: 'Inter', Arial, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 1.4375rem;
+  display: inline-block;
+  margin-top: 25px;
+  margin-bottom: 0;
+  margin-left: 21px;
+  max-width: 225px;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

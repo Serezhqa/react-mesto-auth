@@ -1,0 +1,11 @@
+.elements__image-button {
+  width: 282px;
+  height: 282px;
+  padding: 0;
+  border: none;
+  border-radius: 10px 10px 0 0;
+}
+
+.elements__image-button:hover {
+  cursor: pointer
+}
