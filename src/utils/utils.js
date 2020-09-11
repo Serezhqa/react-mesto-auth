@@ -11,3 +11,6 @@ export const validationProperties = {
 //Базовый URL для запросов
 export const baseURL = 'https://mesto.nomoreparties.co/v1/cohort-12';
 export const token = 'd20b4294-3a82-4b74-a8d9-f1654e520eb0';
+
+//Другой URL для авторизации
+export const baseAuthURL = 'https://auth.nomoreparties.co';

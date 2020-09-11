@@ -7,27 +7,29 @@ class Main extends React.Component {
 
   render() {
     return (
-      <main className="content">
-        <section className="profile">
-          <button className="profile__avatar-button" type="button" onClick={this.props.onEditAvatar} aria-label="Изменить аватар.">
-            <img className="profile__avatar" alt="Аватар пользователя." src={this.context.avatar} />
-          </button>
-          <div className="profile__info">
-            <div className="profile__name-info">
-              <h1 className="profile__name">{this.context.name}</h1>
-              <button className="profile__edit-button" type="button" onClick={this.props.onEditProfile} aria-label="Редактировать информацию о пользователе."></button>
+      <>
+        <main className="content">
+          <section className="profile">
+            <button className="profile__avatar-button" type="button" onClick={this.props.onEditAvatar} aria-label="Изменить аватар.">
+              <img className="profile__avatar" alt="Аватар пользователя." src={this.context && this.context.avatar} />
+            </button>
+            <div className="profile__info">
+              <div className="profile__name-info">
+                <h1 className="profile__name">{this.context && this.context.name}</h1>
+                <button className="profile__edit-button" type="button" onClick={this.props.onEditProfile} aria-label="Редактировать информацию о пользователе."></button>
+              </div>
+              <p className="profile__description">{this.context && this.context.about}</p>
             </div>
-            <p className="profile__description">{this.context.about}</p>
-          </div>
-          <button className="profile__add-button" type="button" onClick={this.props.onAddPlace} aria-label="Добавить фото."></button>
-        </section>
+            <button className="profile__add-button" type="button" onClick={this.props.onAddPlace} aria-label="Добавить фото."></button>
+          </section>
 
-        <section className="elements">
-          {this.props.cards.map(card => (
-            <Card card={card} key={card._id} onCardClick={this.props.onCardClick} onCardLike={this.props.onCardLike} onCardDelete={this.props.onCardDelete} />
-          ))}
-        </section>
-      </main>
+          <section className="elements">
+            {this.props.cards.map(card => (
+              <Card card={card} key={card._id} onCardClick={this.props.onCardClick} onCardLike={this.props.onCardLike} onCardDelete={this.props.onCardDelete} />
+            ))}
+          </section>
+        </main>
+      </>
     )
   }
 }

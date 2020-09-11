@@ -1,4 +1,5 @@
 import React from 'react';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -8,7 +9,12 @@ import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import api from '../utils/Api.js';
+import Login from './Login.js';
+import Register from './Register.js';
+import ProtectedRoute from './ProtectedRoute.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import Auth from '../utils/Auth.js';
+import InfoTooltip from './InfoTooltip.js';
 
 class App extends React.Component {
   constructor(props) {
@@ -17,13 +23,19 @@ class App extends React.Component {
       isEditProfilePopupOpen: false,
       isAddPlacePopupOpen: false,
       isEditAvatarPopupOpen: false,
-      selectedCard: null,
+      selectedCardLink: null,
+      selectedCardName: null,
       currentUser: null,
-      cards: []
+      cards: [],
+      loggedIn: false,
+      email: null,
+      loginPageActive: true,
+      message: null
     }
   }
 
   componentDidMount() {
+    this.tokenCheck();
     Promise.all([api.getUserInfo(), api.getInitialCards()])
       .then(([userInfo, initialCards]) => {
         this.setState({
@@ -32,6 +44,64 @@ class App extends React.Component {
         })
       })
       .catch(error => console.log(error));
+  }
+
+  tokenCheck = () => {
+    if (localStorage.getItem('token')) {
+      const token = localStorage.getItem('token');
+      Auth.getContent(token)
+        .then(res => {
+          if (res) {
+            this.setState({
+              loggedIn: true,
+              email: res.data.email,
+              loginPageActive: false
+            }, () => {
+              this.props.history.push("/");
+            });
+          }
+        });
+    }
+  }
+
+  onLogin = (email) => {
+    this.setState({
+      loggedIn: true,
+      email,
+      loginPageActive: false
+    })
+  }
+
+  onRegister = (email, password) => {
+    Auth.register(email, password)
+      .then(res => {
+        if (res) {
+          this.setState({
+            message: 'Вы успешно зарегистрировались!'
+          }, () => {
+            this.props.history.push('/signin');
+          })
+        } else {
+          this.setState({
+            message: 'Что-то пошло не так! Попробуйте ещё раз.'
+          })
+        }
+      });
+  }
+
+  onSignOut = () => {
+    this.setState({
+      loggedIn: false,
+      email: null,
+      loginPageActive: true
+    })
+    localStorage.removeItem('token');
+  }
+
+  handleRedirect = () => {
+    this.setState({
+      loginPageActive: !this.state.loginPageActive
+    })
   }
 
   handleEditAvatarClick = () => {
@@ -54,7 +124,8 @@ class App extends React.Component {
 
   handleCardClick = (card) => {
     this.setState({
-      selectedCard: card.link
+      selectedCardLink: card.link,
+      selectedCardName: card.name
     })
   }
 
@@ -63,7 +134,9 @@ class App extends React.Component {
       isEditProfilePopupOpen: false,
       isAddPlacePopupOpen: false,
       isEditAvatarPopupOpen: false,
-      selectedCard: null
+      selectedCardLink: null,
+      selectedCardName: null,
+      message: null
     })
   }
 
@@ -127,16 +200,33 @@ class App extends React.Component {
     return (
       <div className="page">
         <CurrentUserContext.Provider value={this.state.currentUser}>
-          <Header />
-          {this.state.currentUser && <Main
-            onEditProfile={this.handleEditProfileClick}
-            onAddPlace={this.handleAddPlaceClick}
-            onEditAvatar={this.handleEditAvatarClick}
-            onCardClick={this.handleCardClick}
-            cards={this.state.cards}
-            onCardLike={this.handleCardLike}
-            onCardDelete={this.handleCardDelete}
-          />}
+          <Header loggedIn={this.state.loggedIn} email={this.state.email} loginPageActive={this.state.loginPageActive}
+            onSignOut={this.onSignOut} handleRedirect={this.handleRedirect} />
+          <Switch>
+            <ProtectedRoute exact path="/"
+              loggedIn={this.state.loggedIn}
+              onEditProfile={this.handleEditProfileClick}
+              onAddPlace={this.handleAddPlaceClick}
+              onEditAvatar={this.handleEditAvatarClick}
+              onCardClick={this.handleCardClick}
+              cards={this.state.cards}
+              onCardLike={this.handleCardLike}
+              onCardDelete={this.handleCardDelete}
+              component={Main} />
+
+            <Route path="/signin">
+              <Login onLogin={this.onLogin} handleRedirect={this.handleRedirect} />
+            </Route>
+
+            <Route path="/signup">
+              <Register onRegister={this.onRegister} handleRedirect={this.handleRedirect} />
+            </Route>
+
+            <Route>
+              <Redirect to={`/${this.state.loggedIn ? '' : 'signin'}`} />
+            </Route>
+          </Switch>
+
           <Footer />
 
           {this.state.currentUser && <EditProfilePopup isOpen={this.state.isEditProfilePopupOpen} onClose={this.closeAllPopups} onUpdateUser={this.handleUpdateUser} />}
@@ -147,11 +237,13 @@ class App extends React.Component {
 
           <EditAvatarPopup isOpen={this.state.isEditAvatarPopupOpen} onClose={this.closeAllPopups} onUpdateAvatar={this.handleUpdateAvatar} />
 
-          <ImagePopup card={this.state.selectedCard} onClose={this.closeAllPopups} />
+          <ImagePopup card={this.state.selectedCardLink} name={this.state.selectedCardName} onClose={this.closeAllPopups} />
+
+          <InfoTooltip isOpen={this.state.isTooltipPopupOpen} onClose={this.closeAllPopups} message={this.state.message} />
         </CurrentUserContext.Provider>
       </div>
     );
   }
 }
 
-export default App;
+export default withRouter(App);

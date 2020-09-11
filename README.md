@@ -8,4 +8,4 @@
 4. медиазапросы для обеспечения адаптивности;
 5. React с использованием классовых компонентов.
 
-Ссылка на GitHub Pages: http://serezhqa.github.io/mesto-react
+Ссылка на GitHub Pages: http://serezhqa.github.io/react-mesto-auth
